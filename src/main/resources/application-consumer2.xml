@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		      http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		      http://www.springframework.org/schema/context
+		      http://www.springframework.org/schema/context/spring-context.xsd
+		      http://www.springframework.org/schema/mvc
+		      http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+		      http://www.springframework.org/schema/task
+			  http://www.springframework.org/schema/task/spring-task-3.2.xsd">
+
+	<task:annotation-driven />
+	<context:component-scan base-package="com.mapbar">
+		<context:include-filter type="regex" expression=".mq.activemq.consumer.*"/>
+	</context:component-scan>
+
+	<bean id="jmsFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+		<property name="brokerURL">
+			<value>tcp://10.10.24.200:61616</value>
+		</property>
+	</bean>
+
+     <!-- 发送消息 topic -->
+     <bean id="destination" class="org.apache.activemq.command.ActiveMQTopic">
+     	 <constructor-arg index="0" value="FlexTopic"/>
+     </bean>
+     
+     <!-- 消息转换器 -->
+     <bean id="messageConverter" class="com.mapbar.mq.activemq.common.CommonMessageConverter"/>
+     
+     <!-- 生产消息配置 -->
+     <bean id="queueConsumer3" class="com.mapbar.mq.activemq.consumer.CommonConsumer"/>
+     <bean id="queueConsumer4" class="com.mapbar.mq.activemq.consumer.CommonConsumer2"/>
+     <bean id="queueConsumer5" class="com.mapbar.mq.activemq.consumer.CommonConsumer2"/>
+     
+     
+     <!-- 主题   TopicDestination  监听1 -->
+     <bean id="queueListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
+         <constructor-arg ref="queueConsumer3"/>
+         <property name="defaultListenerMethod" value="reciveTopic"/>
+         <property name="messageConverter" ref="messageConverter"/>
+     </bean>
+     <bean id="queueListenerContainer4t1" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+         <property name="connectionFactory" ref="jmsFactory"/>
+         <property name="destination" ref="destination" />
+         <property name="messageListener" ref="queueListener" />
+         <property name="pubSubDomain" value="true"/> 
+     </bean>
+     
+     <!-- 主题   TopicDestination  监听2 -->
+     <bean id="queueListener2" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
+         <constructor-arg ref="queueConsumer4"/>
+         <property name="defaultListenerMethod" value="reciveTopic"/>
+         <property name="messageConverter" ref="messageConverter"/>
+     </bean>
+     <bean id="queueListenerContainer4t2" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+         <property name="connectionFactory" ref="jmsFactory"/>
+         <property name="destination" ref="destination" />
+         <property name="messageListener" ref="queueListener2" />
+         <property name="pubSubDomain" value="true"/>
+     </bean>
+     
+     <!-- 主题   TopicDestination  监听2 -->
+     <bean id="queueListener3" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
+         <constructor-arg ref="queueConsumer4"/>
+         <property name="defaultListenerMethod" value="reciveTopic"/>
+         <property name="messageConverter" ref="messageConverter"/>
+     </bean>
+     <bean id="queueListenerContainer4t3" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+         <property name="connectionFactory" ref="jmsFactory"/>
+         <property name="destination" ref="destination" />
+         <property name="messageListener" ref="queueListener2" />
+         <property name="pubSubDomain" value="true"/>
+     </bean>
+     
+</beans>

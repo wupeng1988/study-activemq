@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		      http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		      http://www.springframework.org/schema/context
+		      http://www.springframework.org/schema/context/spring-context.xsd
+		      http://www.springframework.org/schema/mvc
+		      http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+		      http://www.springframework.org/schema/task
+			  http://www.springframework.org/schema/task/spring-task-3.2.xsd">
+
+	<task:annotation-driven />
+	<context:component-scan base-package="com.mapbar">
+		<context:include-filter type="regex" expression=".mq.activemq.producer.*"/>
+	</context:component-scan>
+
+	<bean id="jmsFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+		<property name="brokerURL">
+			<value>tcp://10.10.24.200:61616</value>
+		</property>
+	</bean>
+
+	<!-- 发送消息的目的地（一个队列） -->
+     <bean id="destination" class="org.apache.activemq.command.ActiveMQQueue">
+         <!-- 设置消息队列的名字 -->
+         <constructor-arg index="0" value="activeMQQueue" />
+     </bean>
+     
+     <!-- 消息转换器 -->
+     <bean id="messageConverter" class="com.mapbar.mq.activemq.common.CommonMessageConverter"/>
+     
+      <!-- 配置JMS模版 -->
+     <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+         <property name="connectionFactory" ref="jmsFactory" />
+         <property name="messageConverter" ref="messageConverter" />
+     </bean>
+     
+     <bean id="messageSender" class="com.mapbar.mq.activemq.producer.MessageSender"></bean>
+
+</beans>
